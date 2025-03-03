@@ -4,49 +4,42 @@ import Map from 'ol/Map';
 import View from 'ol/View';
 import { OSM } from 'ol/source';
 import { Tile as TileLayer } from 'ol/layer';
-import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
+import VectorImageLayer from 'ol/layer/VectorImage';
 import GeoJSON from 'ol/format/GeoJSON';
 import { toStringXY } from 'ol/coordinate';
 import { useGeographic } from 'ol/proj';
-import {defaults as defaultInteractions} from 'ol/interaction/defaults.js';
-import Modify from 'ol/interaction/Modify.js';
-import Select from 'ol/interaction/Select.js';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 
-const VectorApp = () => {
+const ImageApp = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [showInfo, setShowInfo] = useState(false);
   const [hoverInfo, setHoverInfo] = useState<{ properties: any; position: any } | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<Map | null>(null);
-  const vectorLayersRef = useRef<VectorLayer[]>([]);
+  const vectorLayersRef = useRef<VectorImageLayer[]>([]);
   const [layers, setLayers] = useState<{name: string, visible: boolean, id: number}[]>([]);
   const [nextLayerId, setNextLayerId] = useState(1);
   useGeographic();
 
   // Generate a random color for each layer
-  const getRandomColor = () => {
+  const getRandomStyle = () => {
     const r = Math.floor(Math.random() * 200) + 55;
     const g = Math.floor(Math.random() * 200) + 55;
     const b = Math.floor(Math.random() * 200) + 55;
-    return [r, g, b];
-  };
-
-  // Create a style function based on a color
-  const createLayerStyle = (color: number[]) => {
+    
     return new Style({
       fill: new Fill({
-        color: [...color, 0.3]
+        color: [r, g, b, 0.3]
       }),
       stroke: new Stroke({
-        color: color,
+        color: [r, g, b],
         width: 2
       }),
       image: new CircleStyle({
         radius: 6,
         fill: new Fill({
-          color: color
+          color: [r, g, b]
         })
       })
     });
@@ -54,15 +47,9 @@ const VectorApp = () => {
 
   useEffect(() => {
     if (!mapRef.current) return;
-    const select = new Select();
-    
-    const modify = new Modify({
-      features: select.getFeatures(),
-    });
 
     // Initialize map only once
     mapInstance.current = new Map({
-      interactions: defaultInteractions().extend([select, modify]),
       target: mapRef.current,
       layers: [new TileLayer({ source: new OSM() })],
       view: new View({ center: [0, 0], zoom: 2 })
@@ -113,16 +100,17 @@ const VectorApp = () => {
 
           const source = new VectorSource({ features });
           
-          // Generate a random color for this layer
-          const layerColor = getRandomColor();
+          // Generate unique styling for this layer
+          const layerStyle = getRandomStyle();
           
-          // Create and add new vector layer
-          const newVectorLayer = new VectorLayer({
+          // Create and add new vector image layer
+          const newVectorLayer = new VectorImageLayer({
             source,
-            style: createLayerStyle(layerColor)
+            style: layerStyle,
+            imageRatio: 2  // Higher value means lower resolution but better performance
           });
           
-          // Set a custom property for layer identification
+          // Set custom properties for layer identification
           const layerId = nextLayerId;
           newVectorLayer.set('id', layerId);
           newVectorLayer.set('name', file.name);
@@ -191,13 +179,13 @@ const VectorApp = () => {
     <div className="h-full w-full relative">
       <div className="absolute top-4 right-4 z-10 bg-white p-4 rounded shadow-lg">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Upload GeoJSON Files
+          Upload GeoJSON Files (Image)
         </label>
         <input
           type="file"
           accept=".geojson,application/json"
           onChange={handleFileUpload}
-          multiple  // Allow multiple file selection
+          multiple // Allow multiple file selection
           className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
         />
         <div className="mt-4">
@@ -266,4 +254,4 @@ const VectorApp = () => {
   );
 };
 
-export default VectorApp;
+export default ImageApp;

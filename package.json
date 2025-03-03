@@ -12,13 +12,17 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.0.6",
     "@types/ol": "^7.0.0",
+    "geojson-vt": "^4.0.2",
     "ol": "^10.4.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwindcss": "^4.0.6"
+    "simplify-js": "^1.2.4",
+    "tailwindcss": "^4.0.6",
+    "topojson-server": "^3.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
+    "@types/geojson-vt": "^3.2.5",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",

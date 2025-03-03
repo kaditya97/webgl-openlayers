@@ -1,49 +1,47 @@
-import React, { useState } from "react";
-import WebGLApp from './WebGLApp.tsx'
-import VectorApp from './VectorApp.tsx'
+import { useState } from "react";
+import WebGLApp from './WebGLApp.tsx';
+import VectorApp from './VectorApp.tsx';
+import ImageApp from "./ImageApp.tsx";
+import TopoApp from "./TopoApp.tsx";
+import SimplifyApp from "./SimplifyApp.tsx";
+import GeojsonvtApp from "./GeojsonvtApp.tsx";
+
+const appConfig = [
+  { id: "WebGLApp", name: "WebGL", component: WebGLApp },
+  { id: "VectorApp", name: "Vector", component: VectorApp },
+  { id: "ImageApp", name: "Image", component: ImageApp },
+  { id: "TopoApp", name: "Topo", component: TopoApp },
+  { id: "SimplifyApp", name: "Simplify", component: SimplifyApp },
+  { id: "GeojsonvtApp", name: "Geojsonvt", component: GeojsonvtApp },
+];
 
 const App = () => {
-  const [dividerPosition, setDividerPosition] = useState(50); // 50% width for each
+  const [selectedApp, setSelectedApp] = useState("WebGLApp");
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-
-    const startX = e.clientX;
-    const startWidth = dividerPosition;
-
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const deltaX = moveEvent.clientX - startX;
-      const newWidth = Math.min(90, Math.max(10, startWidth + (deltaX / window.innerWidth) * 100));
-
-      setDividerPosition(newWidth);
-    };
-
-    const handleMouseUp = () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-  };
+  // Get the selected component
+  const SelectedComponent = appConfig.find(app => app.id === selectedApp)?.component || TopoApp;
 
   return (
-    <div className="relative h-screen flex">
-      {/* Left Map */}
-      <div className="h-full" style={{ width: `${dividerPosition}%` }}>
-        <WebGLApp />
-      </div>
+    <div className="relative h-screen flex flex-col">
+      {/* Navigation Buttons - Takes only required height */}
+      <nav className="flex p-4 bg-gray-200 gap-4">
+        {appConfig.map((app) => (
+          <button
+            key={app.id}
+            onClick={() => setSelectedApp(app.id)}
+            className={`px-4 py-2 rounded-lg transition duration-300 cursor-pointer ${
+              selectedApp === app.id ? "bg-blue-700 text-white" : "bg-blue-500 text-white hover:bg-blue-600"
+            }`}
+          >
+            {app.name}
+          </button>
+        ))}
+      </nav>
 
-      {/* Resizable Divider */}
-      <div
-        className="w-2 bg-gray-400 cursor-ew-resize hover:bg-gray-500 transition"
-        onMouseDown={handleMouseDown}
-      ></div>
-
-      {/* Right Map */}
-      <div className="h-full flex-1" style={{ width: `${100 - dividerPosition}%` }}>
-        <VectorApp />
-      </div>
+      {/* Main Content - Takes remaining height */}
+      <main className="flex-grow">
+        <SelectedComponent />
+      </main>
     </div>
   );
 };
